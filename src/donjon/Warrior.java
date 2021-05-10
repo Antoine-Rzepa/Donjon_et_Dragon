@@ -32,8 +32,7 @@ public class Warrior extends Personnage{
 	
 	// -------------------------------------   AFFICHAGE -------------------------------------- //
 	public String toString() {
-		return  "-------------------- \n" +
-				"Warrior " + super.toString() + "\n" +
+		return  "Warrior " + super.toString() + "\n" +
 				this.physicalDamages + " en Dégats physique \n" +
 				weapon.toString() + "\n" +
 				shield.toString() + "\n" +
@@ -46,6 +45,11 @@ public class Warrior extends Personnage{
 	}
 	public void setPhysicalDamages(int physicalDamages) {
 		this.physicalDamages = physicalDamages;
+	}
+	@Override
+	public void setDamages(int damages) {
+		// TODO Auto-generated method stub
+		this.setPhysicalDamages(damages);
 	}
 
 }

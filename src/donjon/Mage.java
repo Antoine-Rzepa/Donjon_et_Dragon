@@ -32,9 +32,7 @@ public class Mage extends Personnage{
 	
 	// -------------------------------------   AFFICHAGE -------------------------------------- //
 	public String toString() {
-		return  "-------------------- \n" +
-				"Mage " + super.toString() + "\n" +
-				super.getLife() + " de Santé \n" +
+		return 	"Mage " + super.toString() + "\n" +
 				this.magicalDamages + " en Dégats magique \n" +
 				spell.toString() + "\n" +
 				philtre.toString() + "\n" +
@@ -47,6 +45,11 @@ public class Mage extends Personnage{
 	}
 	public void setMagicalDamages(int magicalDamages) {
 		this.magicalDamages = magicalDamages;
+	}
+	@Override
+	public void setDamages(int damages) {
+		// TODO Auto-generated method stub
+		this.setMagicalDamages(damages);
 	}
 
 }

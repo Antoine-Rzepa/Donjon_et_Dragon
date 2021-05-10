@@ -47,6 +47,7 @@ abstract public class Personnage {
 	public void setImage(String image) {
 		this.image = image;
 	}
+	abstract public void setDamages(int damages);
  
 	// -------------------------------------   AFFICHAGE -------------------------------------- //
 	public String toString() {

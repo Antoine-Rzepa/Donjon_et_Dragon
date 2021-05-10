@@ -1,12 +1,16 @@
 package donjon;
+import exception.InvalidNumberException;
+import rooms.*;
 
 import java.util.Scanner;  // Import the Scanner class	
+
 import java.util.ArrayList; //import the ArrayList class
 import java.util.InputMismatchException;
 
 public class Menu{
 
 	ArrayList<Personnage> allHeroes = new ArrayList<Personnage>();
+	ArrayList<Rooms> boardGame = new ArrayList<Rooms>();
 
 	Scanner sc;
 	// -------------------------------------   CONSTRUCTOR -------------------------------------- //
@@ -23,7 +27,8 @@ public class Menu{
 				System.out.println("----- MENU PRINCIPAL -----");
 				System.out.println("1 : Créer un personnage");
 				System.out.println("2 : Voir les personnages");
-				System.out.println("3 : Quitter le jeu");
+				System.out.println("3 : Selectionner un personnages");
+				System.out.println("4 : Quitter le jeu");
 				System.out.println("--------------------------");
 				String menuSelected = sc.nextLine();
 				switch(menuSelected.toLowerCase()) {
@@ -40,7 +45,45 @@ public class Menu{
 				case "2":
 					showAllHeroes();
 					break;
-				case "3":
+				case "3":					
+					boolean heroSelected = false;
+					int i = 1;
+
+					do {
+						System.out.println("----- CHOISIR LE PERSONNAGE -----");					
+						for(Personnage personnage : allHeroes) {					
+							System.out.println(i + " : " + personnage.getName());	
+							i++;
+						}
+						System.out.println(i + " : Revenir au menu principal" );
+
+						int heroPicked = sc.nextInt();
+						sc.nextLine();
+						try {		
+
+							if(heroPicked == i) {
+								heroSelected = true;
+								break;
+							}
+							System.out.println("----- PERSONNAGE -----");
+							System.out.println("----- " + allHeroes.get(heroPicked -1).getName() + " -----");
+
+							boolean heroEdit = false;
+							do {
+								heroEdit = heroSelectionAndModification(heroPicked, heroEdit);								
+							}while(!heroEdit);
+
+						}catch (IndexOutOfBoundsException e){
+							sc.nextLine();
+							System.out.println("Saississez une commande valide");
+						}
+						i = 1;
+					}while(!heroSelected);
+
+
+
+					break;
+				case "4":
 					runGame = false;
 					System.out.println("A bientôt !");
 					break;
@@ -53,6 +96,173 @@ public class Menu{
 		}
 	}
 
+	// ---------------------------------------------- CREATION DU BOARD -----------------------------------------------//
+	
+	private Rooms randomRooms() {
+		Rooms room = null;
+		int randomNumber = 1 + (int)(Math.random() * ((3 - 1) + 1));
+		switch(randomNumber){
+		case 1:
+			room = new ObjectRoom();
+			break;
+		case 2:
+			room = new MonsterRoom();
+			break;
+		case 3:
+			room = new EmptyRoom();
+			break;
+		}
+		return room;
+	}
+	
+	private void runBoard(int boardSize) {
+						
+		for(int i = 0; i < boardSize; i++) {
+			boardGame.add(randomRooms());
+		}
+		for(Rooms board : boardGame) {					
+			System.out.println(board);	
+		}
+		
+	}	
+	
+	// ---------------------------------------------- SELECTION DU HERO -----------------------------------------------//
+	private boolean heroSelectionAndModification(int heroPicked, boolean heroEdit) {
+		System.out.println("----- MENU DE MODIFICATION -----");
+		System.out.println("1 : Afficher info");
+		System.out.println("2 : Supprimer personnage");
+		System.out.println("3 : Modifier statistiques");
+		System.out.println("4 : Revenir au menu précédent");
+		System.out.println("--------------------------------");
+		String heroMenuSelected = sc.nextLine();
+		Personnage personnage = allHeroes.get(heroPicked -1);
+		switch(heroMenuSelected) {
+		case "1":
+			System.out.println(personnage.toString());
+			break;
+		case "2":								
+			allHeroes.remove(personnage);
+			heroEdit = true;
+			break;
+		case "3":
+			boolean heroModify = false;
+			do {
+				System.out.println("----- MENU DE MODIFICATION -----");
+				System.out.println("1 : Changer le nom");
+				System.out.println("2 : Modifier la vie");
+				System.out.println("3 : Modifier les dégats");
+				System.out.println("4 : Finir l'édition du personnage");
+				System.out.println("--------------------------------");
+
+				String editChoosen = sc.nextLine();
+				
+				switch(editChoosen) {
+				case "1":
+					changeName(personnage);
+					break;
+				case "2":
+					changeLife(personnage);
+					break;
+				case "3":
+					changeDamages(personnage);
+					break;
+				case "4":
+					heroModify = true;
+					break;
+				default:
+					System.out.println("Saississez une commande valide");
+				}
+			}while(!heroModify);						
+			break;
+		case "4":
+			heroEdit = true;
+			break;
+		default:
+			System.out.println("Saississez une commande valide");
+		}
+		return heroEdit;
+	}
+
+	// ---------------------------------------------- CHANGER LE NOM -----------------------------------------------//
+	private void changeName(Personnage personnage) {
+		System.out.println("Quel nouveau nom voulez vous donner ?");
+		String newName;							
+		newName = sc.nextLine();
+		personnage.setName(newName);
+	}
+	// ---------------------------------------------- CHANGER LA VIE -----------------------------------------------//
+	private void changeLife(Personnage perso) {
+		boolean newLifeChoosen = false;
+		if(perso instanceof Warrior) {
+			System.out.println("Quelle nouvelle quantité de vie voulez vous donner ?(de 5 à 10)");
+		}
+		if(perso instanceof Mage) {
+			System.out.println("Quelle nouvelle quantité de vie voulez vous donner ?(de 3 à 6)");
+		}										
+		do {							
+			int newLife;							
+			newLife = sc.nextInt();
+			sc.nextLine();
+
+			if(perso instanceof Warrior) {
+				try {
+					if (newLife >= 5 && newLife <= 10) {
+						perso.setLife(newLife);;
+						newLifeChoosen = true;
+					}else {
+						throw new InvalidNumberException();
+					}
+				}catch(InvalidNumberException e) {
+					System.out.println("Vous devez choisir un valeur entre 5 et 10");
+				}
+			} else if(perso instanceof Mage) {
+				try {
+					if (newLife >= 3 && newLife <= 6) {
+						perso.setLife(newLife);;
+						newLifeChoosen = true;
+					}else {
+						throw new InvalidNumberException();
+					}
+				}catch(InvalidNumberException e) {
+					System.out.println("Vous devez choisir un valeur entre 3 et 6");
+				}
+			}
+		}while(!newLifeChoosen);
+	}
+	// ---------------------------------------------- CHANGER LES DEGATS -----------------------------------------------//
+	private void changeDamages(Personnage perso) {
+		boolean newDamagesChoosen = false;
+		if(perso instanceof Warrior) {
+			System.out.println("Quelle nouvelle force voulez vous donner ?(de 5 à 10)");
+		}
+		if(perso instanceof Mage) {
+			System.out.println("Quelle nouvelle force voulez vous donner ?(de 8 à 15)");
+		}
+		do {							
+			int newDamages;
+			newDamages = sc.nextInt();
+			sc.nextLine();
+
+			if(perso instanceof Warrior) {
+				Warrior warrior = (Warrior)perso;
+				if (newDamages >= 5 && newDamages <= 10) {
+					warrior.setDamages(newDamages);
+					newDamagesChoosen = true;
+				}else {
+					System.out.println("Vous devez choisir un valeur entre 5 et 10");
+				}												 										
+			}else if(perso instanceof Mage) {
+				Mage mage = (Mage)perso;
+				if (newDamages >= 8 && newDamages <= 15) {
+					mage.setDamages(newDamages);
+					newDamagesChoosen = true;
+				}else {
+					System.out.println("Vous devez choisir un valeur entre 8 et 15");
+				}												 										
+			}											
+		}while(!newDamagesChoosen);
+	}
+
 	// ---------------------------------------------- MENU D'ENTREE -----------------------------------------------//
 	private boolean welcome() {
 		boolean welcome = true;
@@ -63,7 +273,7 @@ public class Menu{
 		System.out.println("--------------------------------------------");
 
 
-		//do {
+		do {
 
 			try {
 				int launchgame = sc.nextInt();
@@ -75,15 +285,13 @@ public class Menu{
 				case 2:
 					welcome = false;
 					break;
-				//default:
-					//System.out.println("Saississez une commande valide");
 				}
 
 			} catch (InputMismatchException e) {	
 				sc.nextLine();
 				System.out.println("Saississez une commande valide");
 			}
-		//}while(!gameStarted && welcome);
+		}while(!gameStarted && welcome);
 
 
 		return welcome;
@@ -368,15 +576,15 @@ public class Menu{
 						break;
 					case "2":						
 						boolean newLifeChoosen = false;
-						System.out.println("Quelle nouvelle quantité de vie voulez vous donner ?(de 3 à 8)");
+						System.out.println("Quelle nouvelle quantité de vie voulez vous donner ?(de 3 à 6)");
 						do {
 							int newLife;							
 							newLife = sc.nextInt();
-							if (newLife >= 3 && newLife <= 8) {
+							if (newLife >= 3 && newLife <= 6) {
 								mage.setLife(newLife);
 								newLifeChoosen = true;
 							}else {
-								System.out.println("Vous devez choisir un valeur entre 3 et 8");
+								System.out.println("Vous devez choisir un valeur entre 3 et 6");
 							}
 						}while(!newLifeChoosen);
 						break;
@@ -427,6 +635,7 @@ public class Menu{
 
 		Menu m = new Menu();
 		m.runGame();
+		m.runBoard(64);
 
 	}
 }
